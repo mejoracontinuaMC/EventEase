@@ -1,0 +1,31 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x' # Tailored to your project's .NET 10 environment
+
+    - name: Publish App
+      run: dotnet publish -c Release -o release
+
+    - name: Fix base href for GitHub Pages
+      run: sed -i 's/<base href="\/" \/>/<base href="\/EventEase\/" \/>/g' release/wwwroot/index.html
+
+    - name: Add .nojekyll bypass
+      run: touch release/wwwroot/.nojekyll
+
+    - name: Commit and Deploy to gh-pages branch
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: release/wwwroot
+        branch: gh-pages
