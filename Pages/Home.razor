@@ -1,0 +1,82 @@
+﻿@page "/"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@inject SessionState Session
+
+<PageTitle>EventEase - Home</PageTitle>
+
+<div class="container mt-4">
+    <div class="p-4 p-md-5 text-white rounded bg-dark mb-4">
+        <h1 class="display-4 font-italic">EventEase Dashboard</h1>
+        <p class="lead my-3">Welcome, <strong>@Session.Username</strong>! Track schedules and manage registration fluidly.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <div class="p-4 border rounded bg-light shadow-sm">
+                <h4 class="mb-3 text-secondary">User Session Registration</h4>
+                <EditForm Model="@registrationModel" OnValidSubmit="HandleRegistration">
+                    <DataAnnotationsValidator />
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label font-weight-bold">Full Name</label>
+                        <InputText class="form-control" @bind-Value="@registrationModel.Name" placeholder="John Doe" />
+                        <ValidationMessage For="@(() => registrationModel.Name)" class="text-danger small" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label font-weight-bold">Email Address</label>
+                        <InputText class="form-control" @bind-Value="@registrationModel.Email" placeholder="john@example.com" />
+                        <ValidationMessage For="@(() => registrationModel.Email)" class="text-danger small" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-2">Update Session Profile</button>
+                </EditForm>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <h4 class="mb-3">Available Corporate Events</h4>
+            <div style="height: 500px; overflow-y: auto;" class="border p-2 rounded bg-white">
+                <Virtualize Items="@MockEvents" Context="evt">
+                    <EventCard EventItem="evt" />
+                </Virtualize>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegistrationModel registrationModel = new();
+    private List<EventCard.EventModel> MockEvents = new();
+
+    protected override void OnInitialized()
+    {
+        for (int i = 1; i <= 200; i++)
+        {
+            MockEvents.Add(new EventCard.EventModel
+            {
+                Id = i,
+                Name = $"Corporate Summit Sync #{i}",
+                Date = DateTime.Now.AddDays(i),
+                Location = $"Conference Hall Room {100 + i}"
+            });
+        }
+    }
+
+    private void HandleRegistration()
+    {
+        Session.Login(registrationModel.Name ?? "User");
+    }
+
+    public class RegistrationModel
+    {
+        [Required(ErrorMessage = "Name field cannot be empty.")]
+        [StringLength(30, ErrorMessage = "Name is too long (30 characters max).")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email validation is mandatory.")]
+        [EmailAddress(ErrorMessage = "Please input a valid email formatting rule.")]
+        public string Email { get; set; } = string.Empty;
+    }
+}

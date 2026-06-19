@@ -1,0 +1,43 @@
+@code {
+    [Parameter] public EventModel EventItem { get; set; }
+    
+    private bool IsAttending { get; set; } = false;
+    
+    private void ToggleAttendance()
+    {
+        IsAttending = !IsAttending;
+    }
+
+    public class EventModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public DateTime Date { get; set; }
+        public string Location { get; set; }
+    }
+}
+
+<div class="card my-3 shadow-sm" style="width: 18rem; border-radius: 10px;">
+    <div class="card-body">
+        <h5 class="card-title text-primary">
+            <input class="form-control-plaintext font-weight-bold" @bind="EventItem.Name" />
+        </h5>
+        <p class="card-text mb-1 text-muted">
+            <span class="mr-2">🗓️</span>
+            <input type="date" class="form-control form-control-sm d-inline-block w-auto" @bind="EventItem.Date" @bind:format="yyyy-MM-dd" />
+        </p>
+        <p class="card-text">
+            <span class="mr-2">📍</span>
+            <input class="form-control form-control-sm d-inline-block w-75" @bind="EventItem.Location" />
+        </p>
+        <hr />
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="badge @(IsAttending ? "bg-success text-white" : "bg-secondary text-white")">
+                @(IsAttending ? "Attending ✅" : "Not Registered")
+            </span>
+            <button class="btn btn-sm @(IsAttending ? "btn-danger" : "btn-success")" @onclick="ToggleAttendance">
+                @(IsAttending ? "Cancel" : "RSVP")
+            </button>
+        </div>
+    </div>
+</div>
